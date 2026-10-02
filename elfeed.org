@@ -1,0 +1,26 @@
+* RSS :elfeed:
+** [[https://www.theparisreview.org/blog/feed/][Paris Review]] :literature:
+** [[https://feeds.feedburner.com/mcsweeneys][McSweeney's]] :literature:
+** [[https://www.science.org/action/showFeed?type=etoc&feed=rss&jc=science][Science]] :science:
+** [[https://www.nature.com/nature.rss][Nature]] :science:
+** [[https://elifesciences.org/rss/recent.xml][eLife]] :science:
+** [[https://elifesciences.org/rss/subject/genetics-genomics.xml][eLife Genetics Genomics]] :genomics:
+** [[https://elifesciences.org/rss/subject/evolutionary-biology.xml][eLife Evolutionary Biology]] :evolution:
+** [[https://connect.biorxiv.org/biorxiv_xml.php?subject=bioinformatics][BioRxiv Bioinformatics]] :biorxiv:bioinformatics:
+** [[https://connect.biorxiv.org/biorxiv_xml.php?subject=genetics][BioRxiv Genetics]] :biorxiv:genetics:
+** [[https://connect.biorxiv.org/biorxiv_xml.php?subject=genomics][BioRxiv Genomics]] :biorxiv:genomics:
+** [[https://academic.oup.com/rss/site_5139/3001.xml][Bioinformatics]] :bioinformatics:
+** [[https://academic.oup.com/rss/site_6327/4082.xml][GSA Genetics]] :genetics:genomics:
+** [[https://www.nature.com/ng.rss][Nature Genetics]] :genetics:genomics:
+** [[https://www.nature.com/nmeth.rss][Nature Methods]] :bioinformatics:
+** [[https://www.nature.com/nbt.rss][Nature Biotechnology]] :bioinformatics:
+** [[https://genome.cshlp.org/rss/current.xml][Genome Research]] :bioinformatics:genomics:
+** [[https://link.springer.com/search.rss?query=*&content-type=Article&sortBy=relevance&search-within=Journal&facet-journal-id=13059][Genome Biology]] :genomics:
+** [[https://www.nature.com/nm.rss][Nature Medicine]] :medicine:
+** [[https://www.reddit.com/r/emacs.rss][Emacs]] :emacs:
+** [[https://irreal.org/blog/?feed=rss2][Irreal Blog]] :emacs:
+** [[https://sachachua.com/blog/feed/index.xml][Sacha Chua Post]] :emacs:
+** [[https://lars.ingebrigtsen.no/feed/][Lars Ingebrigtsen EWW]] :emacs:
+* Resources
+
+https://rss.feedspot.com/literary_rss_feeds/

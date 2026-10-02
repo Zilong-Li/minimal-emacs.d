@@ -4,3 +4,13 @@
 !init.el
 !.github/
 !.LICENSE
+!.gitignore
+!mini.org
+!elfeed.org
+!pre-early-init.el
+!post-early-init.el
+!pre-init.el
+!post-init.el
+!templates
+!PERSONAL.md
+!tangle.el

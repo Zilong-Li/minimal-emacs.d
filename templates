@@ -1,0 +1,387 @@
+fundamental-mode ;; Available everywhere
+
+(today (format-time-string "%Y-%m-%d"))
+
+prog-mode
+
+(fixme (if (derived-mode-p 'emacs-lisp-mode) ";; " comment-start) "FIXME: ")
+(todo (if (derived-mode-p 'emacs-lisp-mode) ";; " comment-start) "TODO: ")
+(bug (if (derived-mode-p 'emacs-lisp-mode) ";; " comment-start) "BUG: ")
+(hack (if (derived-mode-p 'emacs-lisp-mode) ";; " comment-start) "HACK: ")
+(note (if (derived-mode-p 'emacs-lisp-mode) ";; " comment-start) "NOTE: ")
+(deprecated (if (derived-mode-p 'emacs-lisp-mode) ";; " comment-start) "DEPRECATED: ")
+
+latex-mode
+
+(abstract "\\begin{abstract}\n" r> n> "\\end{abstract}")
+(align "\\begin{align}\n" r> n> "\\end{align}")
+(alignn "\\begin{align*}\n" r> n> "\\end{align*}")
+(gather "\\begin{gather}\n" r> n> "\\end{gather}")
+(gatherr "\\begin{gather*}\n" r> n> "\\end{gather*}")
+(appendix "\\begin{appendix}\n" r> n> "\\end{appendix}")
+(begin "\\begin{" (s env) "}" r> n> "\\end{" (s env) "}")
+(cases "\\begin{cases}\n" r> n> "\\end{cases}")
+(center "\\begin{center}\n" r> n> "\\end{center}")
+(displaymath "\\begin{displaymath}\n" r> n> "\\end{displaymath}")
+(document "\\begin{document}\n" r> n> "\\end{document}")
+(enumerate "\\begin{enumerate}\n\\item " r> n> "\\end{enumerate}")
+(equation "\\begin{equation}" r> n> "\\end{equation}")
+(flushleft "\\begin{flushleft}" r> n> "\\end{flushleft}")
+(flushright "\\begin{flushright}" r> n> "\\end{flushright}")
+(frac "\\frac{" p "}{" q "}")
+(fussypar "\\begin{fussypar}" r> n> "\\end{fussypar}")
+(itemize "\\begin{itemize}\n\\item " r> n> "\\end{itemize}")
+(letter "\\begin{letter}\n" r> n> "\\end{letter}")
+(math "\\begin{math}\n" r> n> "\\end{math}")
+(minipage "\\begin{minipage}[t]{0.5\linewidth}\n" r> n> "\\end{minipage}")
+(quotation "\\begin{quotation}\n" r> n> "\\end{quotation}")
+(quote "\\begin{quote}\n" r> n> "\\end{quote}")
+(sloppypar "\\begin{sloppypar}\n" r> n> "\\end{sloppypar}")
+(theindex "\\begin{theindex}\n" r> n> "\\end{theindex}")
+(trivlist "\\begin{trivlist}\n" r> n> "\\end{trivlist}")
+(verbatim "\\begin{verbatim}\n" r> n> "\\end{verbatim}")
+(verbatimm "\\begin{verbatim*}\n" r> n> "\\end{verbatim*}")
+
+texinfo-mode
+
+(defmac "@defmac " p n> r> "@end defmac")
+(defun "@defun " p n> r> "@end defun")
+(defvar "@defvar " p n> r> "@end defvar")
+(example "@example " p n> r> "@end example")
+(lisp "@lisp " p n> r> "@end lisp")
+(bullet "@itemize @bullet{}" n> r> "@end itemize")
+(code "@code{" p "}")
+(var "@var{" p "}")
+
+org-mode
+
+(caption "#+caption: ")
+(drawer ":" p ":" n r ":end:")
+(begin "#+begin_" (s name) n> r> n "#+end_" name)
+(quote "#+begin_quote" n> r> n "#+end_quote")
+(sidenote "#+begin_sidenote" n> r> n "#+end_sidenote")
+(marginnote "#+begin_marginnote" n> r> n "#+end_marginnote")
+(example "#+begin_example" n> r> n "#+end_example")
+(center "#+begin_center" n> r> n "#+end_center")
+(ascii "#+begin_export ascii" n> r> n "#+end_export")
+(html "#+begin_export html" n> r> n "#+end_export")
+(latex "#+begin_export latex" n> r> n "#+end_export")
+(comment "#+begin_comment" n> r> n "#+end_comment")
+(verse "#+begin_verse" n> r> n "#+end_verse")
+(src "#+begin_src " q n r n "#+end_src")
+(gnuplot "#+begin_src gnuplot :var data=" (p "table") " :file " (p "plot.png") n r n "#+end_src" :post (org-edit-src-code))
+(she "#+begin_src shell :async :session " n r n "#+end_src" :post (org-edit-src-code))
+(elp "#+begin_src emacs-lisp" n r n "#+end_src" :post (org-edit-src-code))
+(ess "#+begin_src R :async :session" n r n "#+end_src" :post (org-edit-src-code))
+(pyn "#+begin_src python :async :session :results output" n r n "#+end_src" :post (org-edit-src-code))
+(pyp "#+begin_src python :async :session :results graphics file output :file out.svg" n r n "#+end_src" :post (org-edit-src-code))
+(title "#+title: " p n "#+author: Zilong Li" n "#+language: en" n "#+STARTUP: show2levels indent hidestars hideblocks")
+
+lisp-mode emacs-lisp-mode ;; Specify multiple modes
+
+(lambda "(lambda (" p ")" n> r> ")")
+
+emacs-lisp-mode
+
+(autoload ";;;###autoload")
+(pt "(point)")
+(var "(defvar " p "\n  \"" p "\")")
+(local "(defvar-local " p "\n  \"" p "\")")
+(const "(defconst " p "\n  \"" p "\")")
+(custom "(defcustom " p "\n  \"" p "\"" n> ":type '" p ")")
+(face "(defface " p " '((t :inherit " p "))\n  \"" p "\")")
+(group "(defgroup " p " nil\n  \"" p "\"" n> ":group '" p n> ":prefix \"" p "-\")")
+(macro "(defmacro " p " (" p ")\n  \"" p "\"" n> r> ")")
+(alias "(defalias '" p " '" p ")")
+(fun "(defun " p " (" p ")\n  \"" p "\"" n> r> ")")
+(iflet "(if-let* (" p ")" n> r> ")")
+(whenlet "(when-let* (" p ")" n> r> ")")
+(whilelet "(while-let* (" p ")" n> r> ")")
+(andlet "(and-let* (" p ")" n> r> ")")
+(cond "(cond" n "(" q "))" >)
+(pcase "(pcase " (p "scrutinee") n "(" q "))" >)
+(let "(let (" p ")" n> r> ")")
+(lett "(let* (" p ")" n> r> ")")
+(pcaselet "(pcase-let (" p ")" n> r> ")")
+(pcaselett "(pcase-let* (" p ")" n> r> ")")
+(rec "(letrec (" p ")" n> r> ")")
+(dotimes "(dotimes (" p ")" n> r> ")")
+(dolist "(dolist (" p ")" n> r> ")")
+(loop "(cl-loop for " p " in " p " do" n> r> ")")
+(command "(defun " p " (" p ")\n  \"" p "\"" n> "(interactive" p ")" n> r> ")")
+(advice "(defun " (p "adv" name) " (&rest app)" n> p n> "(apply app))" n>
+        "(advice-add #'" (p "fun") " " (p ":around") " #'" (s name) ")")
+(header ";;; " (file-name-nondirectory (or (buffer-file-name) (buffer-name)))
+        " -- " p " -*- lexical-binding: t -*-" n
+        ";;; Commentary:" n ";;; Code:" n n)
+(provide "(provide '" (file-name-base (or (buffer-file-name) (buffer-name))) ")" n
+         ";;; " (file-name-nondirectory (or (buffer-file-name) (buffer-name)))
+         " ends here" n)
+
+eshell-mode
+
+(for "for " (p "i") " in " p " { " q " }")
+(while "while { " p " } { " q " }")
+(until "until { " p " } { " q " }")
+(if "if { " p " } { " q " }")
+(ife "if { " p " } { " p " } { " q " }")
+(unl "unless { " p " } { " q " }")
+(unle "unless { " p " } { " p " } { " q " }")
+
+text-mode
+
+(box "┌─" (make-string (length str) ?─) "─┐" n
+     "│ " (s str)                       " │" n
+     "└─" (make-string (length str) ?─) "─┘" n)
+(abox "+-" (make-string (length str) ?-) "-+" n
+      "| " (s str)                       " |" n
+      "+-" (make-string (length str) ?-) "-+" n)
+(cut "--8<---------------cut here---------------start------------->8---" n r n
+     "--8<---------------cut here---------------end--------------->8---" n)
+(rot13 (p "plain text" text) n "----" n (rot13 text))
+(calc (p "taylor(sin(x),x=0,3)" formula) n "----" n (format "%s" (calc-eval formula)))
+
+rst-mode
+
+(title (make-string (length title) ?=) n (p "Title: " title) n (make-string (length title) ?=) n)
+
+markdown-mode
+
+(gitcollapse & "## " (p "Heading") n n "<details>" n n
+             "<summary>" (p "Sub Heading")  "</summary>" n n
+             (r "Insert Link or comments") n n "</details>")
+(bolditalics "***" p "***")
+(srcblock (call-interactively #'markdown-insert-gfm-code-block))
+(src "'" p "'")
+(unorderlist & "- " (p "First") n> "- " (p "Second") n> "- " (p "Third"))
+(orderlist & "1. " (p "First") n> "2. " (p "Second") n> "3. " (p "Third"))
+(insertimage (call-interactively #'markdown-insert-image))
+(insertlink (call-interactively #'markdown-insert-link))
+(hugotitle & "+++" n "title = " (p "title") n "date = " (format-time-string "%Y-%m-%d") n "tags = [ " (p "tag1, tag2 ") "]" n "draft = false" n "+++")
+(h1 & "# " p " #")
+(h2 & "## " p " ##")
+(h3 & "### " p " ###")
+(h4 & "#### " p " ####")
+(inserttable (call-interactively #'markdown-insert-table))
+
+python-mode python-ts-mode
+
+(__contains__ "def __contains__(self, el):" n> p n> "pass")
+(__enter__ "def __enter__(self):" n> p n> "return self")
+(__eq__ "def __eq__(self, other):" n> "return self." p " == other." q)
+(__exit__ "def __exit__(self, type, value, traceback):" n> p n> "pass")
+(__getitem__ "def __len__(self):" n> p n> "pass")
+(__iter__ "def __iter__(self):" n> "return " q)
+(__new__ "def __new__(mcs, name, bases, dict):" n> p n> "return type.__new__(mcs, name, bases, dict)")
+(__setitem__ "__all__ = [" n> p n> "]")
+(arg "parser.add_argument('-" p "', '--" p "'," n> p ")")
+(arg_positional "parser.add_argument('" p "', " p ")")
+(assert "assert " q)
+(assertEqual "self.assertEqual(" p ", " p ")")
+(assertFalse "self.assertFalse(" p ")")
+(assertIn "self.assertIn(" p ", " p ")")
+(assertNotEqual "self.assertNotEqual(" p ", " p ")")
+(assertRaises "assertRaises(" p ", " p ")")
+(assertRaises-with "with self.assertRaises(" p "):" n> q)
+(assertTrue "self.assertTrue(" p ")")
+(celery_pdb "from celery.contrib import rdb; rdb.set_trace()")
+(class "class " p "(" p "):" n> q)
+(classmethod "@classmethod" n> "def " p "(cls, " p "):" n> q)
+(def_decorator "def " p "(func):" n> p n> "def _" p "(*args, **kwargs):" n> p n> "ret = func(*args, **kwargs)" n> p n> "return ret" n n> "return _" q)
+(def_function "def " p "(" p "):" n> q)
+(doc "\"\"\"" p "\"\"\"")
+(doctest ">>> " p n> q)
+(for "for " p " in " p ":" n> q)
+(from "from " p " import " q)
+(function_docstring "def " p "(" p "):" n> "\"\"\"" p "\"\"\"" n> q)
+(if "if " p ":" n> q)
+(ife "if " p ":" n> p n> "else:" n> q)
+(ifmain "if __name__ == '__main__':" n> q)
+(ig "# type: ignore" q)
+(import "import " p q)
+(init "def __init__(self" p "):" n> q)
+(init_docstring "def __init__(self" p "):" n> "\"\"\"" p "\"\"\"" n> q)
+(interact "import code; code.interact(local=locals())")
+(ipdb_trace "import ipdb; ipdb.set_trace()")
+(lambda "lambda " p ": " q)
+(list "[" p " for " p " in " p "]")
+(logger_name "logger = logging.getLogger(__name__)")
+(logging "logger = logging.getLogger(\"" p "\")" n> "logger.setLevel(logging." p ")")
+(main "def main():" n> q)
+(metaclass "__metaclass__ = type")
+(method "def " p "(self" p "):" n> q)
+(method_docstring "def " p "(self" p "):" n> "\"\"\"" p "\"\"\"" n> q)
+(not_impl "raise NotImplementedError")
+(np "import numpy as np" n> q)
+(parse_args "def parse_arguments():" n> "parser = argparse.ArgumentParser(description='" p "')" n> p n> "return parser.parse_args()")
+(pd "import pandas as pd" n> q)
+(tf "import tensorflow as tf" n> q)
+(tr & "import " p "; " p ".set_trace()" q)
+(parser "parser = argparse.ArgumentParser(description='" p "')" n> q)
+(prop "def " p "():"
+      n> "doc = \"\"\"" p "\"\"\""
+      n> "def fget(self):"
+      n> "return self._" p
+      n> n> "def fset(self, value):"
+      n> "self._" p " = value"
+      n> n> "def fdel(self):"
+      n> "del self._" p
+      n> "return locals()"
+      n> p " = property(**" p "())")
+(pass "pass")
+(print "print(" p ")")
+(script "#!/usr/bin/env python" n n> "def main():" n> "pass" n n> "if __name__ == '__main__':" n> "main()")
+(reg p " = re.compile(r\"" p "\")")
+(__repr__ "def __repr__(self):" n> q)
+(return "return " q)
+(selfassign "self." p " = " q)
+(setdef p ".setdefault(" p ", []).append(" p ")")
+(setup "from setuptools import setup" n n> "package = '" p "'" n> "version = '" p "'" n n> "setup(name=package," n> "version=version," n> "description=\"" p "\"," n> "url='" p "'" p ")")
+(shebang "#!/usr/bin/env python" n> q)
+(size "sys.getsizeof(" p ")")
+(static "@staticmethod" n> "def " p "(" p "):" n> q)
+(__str__ "def __str__(self):" n> q)
+(super "super(" p ", self)." p "(" p ")")
+(test_class "class Test" p "(" p "):" n> q)
+(test_file "import unittest" n> "from " p " import *" n> p n> "if __name__ == '__main__':" n> "unittest.main()")
+(trace "import pdb; pdb.set_trace()")
+(try "try:" n> p n> "except " p ":" n> q)
+(tryelse "try:" n> p n> "except " p ":" n> p n> "else:" n> q)
+(__unicode__ "def __unicode__(self):" n> q)
+(utf-8_encoding "# -*- coding: utf-8 -*-")
+(while "while " p ":" n> q)
+(with "with " p p ":" n> q)
+(with_statement "from __future__ import with_statement")
+
+(abox "## +-" (make-string (length str) ?-) "-+" n
+      "## | " (s str)                       " |" n
+      "## +-" (make-string (length str) ?-) "-+" n)
+
+java-mode
+
+(class "public class " (p (file-name-base (or (buffer-file-name) (buffer-name)))) " {" n> r> n "}")
+
+sh-mode sh-ts-mode
+
+(abox "## +-" (make-string (length str) ?-) "-+" n
+      "## | " (s str)                       " |" n
+      "## +-" (make-string (length str) ?-) "-+" n)
+
+(! & "#!/usr/bin/env bash" n> "PS4='+ $(date \"+%x %T %Z\")\\011 ' #trace date" n> "set -e" n q)
+(if "if [ " p " ]" n "  then " p n "fi" q)
+(ife "if [ " p " ]" n "  then " p n "else" p n "fi" q)
+(cs "case " p " in" n> p " )" n> p n> ";;" n> q n "esac")
+(fr "for " p " in " p n "do" n> q n "done")
+
+ess-r-mode
+
+(abox "## +-" (make-string (length str) ?-) "-+" n
+      "## | " (s str)                       " |" n
+      "## +-" (make-string (length str) ?-) "-+" n)
+
+(script "#!/usr/bin/env Rscript" n> n> "args <- commandArgs(trailingOnly = T)" n> q)
+
+c-mode c-ts-mode c++-mode c++-ts-mode
+
+(inc "#include <" (p (concat (file-name-base (or (buffer-file-name) (buffer-name))) ".h")) ">")
+(incc "#include \"" (p (concat (file-name-base (or (buffer-file-name) (buffer-name))) ".h")) "\"")
+
+(fdoc "/**" n
+      " * @brief " (p "Brief description" brief) n
+      " * @param " (p "parameter" param) " " (p "description" param-desc) n
+      " * @return " (p "Return description" return-desc) n
+      " */")
+
+(doc "/** @brief " (p "Brief description") " */")
+
+(edoc "/**" n
+      " * @enum " (p "EnumName" enum-name) n
+      " * @brief " (p "Brief description" brief) n
+      " * @details " (p "Detailed description" detailed) n
+      " */")
+
+(cdoc "/**" n
+      " * @class " (p "ClassName" class-name) n
+      " * @brief " (p "Brief description" brief) n
+      " * @details" (p "Detailed description" detailed) n
+      " * @author " (p (user-full-name)) n
+      " * @date " (p (format-time-string "%Y-%m-%d")) n
+      " */")
+
+(hdoc "/**" n
+      " * @file " (file-name-nondirectory (or (buffer-file-name) "filename.h")) n
+      " * @brief " (p "Brief file description" brief) n
+      " * @details " (p "Detailed description" detailed) n
+      " * @author " (p (user-full-name)) n
+      " * @date " (p (format-time-string "%Y-%m-%d")) n
+      " * @version " (p "v1.0.0" version) n
+      " */" n)
+
+(abox "// +-" (make-string (length str) ?-) "-+" n
+      "// | " (s str)                       " |" n
+      "// +-" (make-string (length str) ?-) "-+" n)
+
+(hdef "#ifndef " (s name) n "#define " name n r n "#endif // " name)
+(main "int main (int argc, char** argv) {"  n> r> n> "return 0;" n "}")
+(struct "struct " p "{" n> r> n "};")
+
+c++-mode c++-ts-mode
+
+(class "class " (s name) "{" n "public:" n> name "(" p "){}" n> "~" name "(){}" n> r> n "};")
+(args "std::vector<std::string> args(argv + 1, argv + argc);" n>
+      "if(argc <= 1 || args[0] == \"-h\" || args[0] == \"-help\" || args[0] == \"--help\"){" n>
+      r> (p "std::cout << \"-i input file\\n\";") n>
+      "return 1;" n
+      "}" n>
+      "std::string in;" n>
+      "for(size_t i = 0; i < args.size(); i++){" n>
+      "if(args[i] == \"-i\") in = args[++i];" n> r> n
+      "}" n)
+
+rust-mode rust-ts-mode
+
+(if "if " p " {" n> q n "}" > q)
+(el "if " p " {" n> p n "} else {" >n> p n "}" > q)
+(elif "if " p " {" n> p n "} else if " p " {" >n> p n "}" > q)
+(fn "fn " p "(" p ") {" n> p n "}" q)
+(fnr "fn " p "(" p ") -> " p " {" n> p n "}" q)
+(crt "extern crate " q ";")
+(drv & "#[derive(" p ")]" q)
+(d "dbg!(" p ")" q)
+(lp "loop {" n> q n "}" > q)
+
+envrc-file-mode
+
+(uv "use_uv() {
+  local pyver=\"${1:-3.10}\"
+  if ! command -v uv >/dev/null 2>&1; then
+    echo \"ERROR: uv not installed\" >&2
+    return 1
+  fi
+  uv python install \"$pyver\"
+  if [ ! -d .venv ]; then
+    uv venv --python \"$pyver\"
+  fi
+  PATH_add \".venv/bin\"
+  export VIRTUAL_ENV=\"$PWD/.venv\"
+  watch_file pyproject.toml
+  watch_file uv.lock
+  if [ -f uv.lock ]; then
+    uv sync --frozen || uv sync
+  else
+    uv sync
+  fi
+  dotenv_if_exists
+}" n
+"if [ -f .python-version ]; then
+  use_uv \"$(cat .python-version)\"
+else
+  use_uv \"3.10\"
+fi" n)
+
+(lsp "uv tool install python-lsp-server")
+
+;; Local Variables:
+;; mode: lisp-data
+;; outline-regexp: "[a-z]"
+;; End:
