@@ -10,6 +10,12 @@
 ;; Load native tree-sitter and personal setup before the Meow integration.
 (require 'my-treesit)
 
+;; Older AUCTeX autoloads alias ConTeXt-mode to context-mode; newer ones
+;; alias in the opposite direction.  Repair the old definition before
+;; Straight activates AUCTeX, including when reloading this configuration.
+(when (eq (symbol-function 'ConTeXt-mode) 'context-mode)
+  (fset 'ConTeXt-mode '(autoload "context" nil t nil)))
+
 
 (defvar my/straight-custom-recipes
   '(
@@ -601,8 +607,24 @@ the terminal's own dark background cannot select the dark face palette."
                    (string-match-p
                     "\\`\\(?:xterm\\|rxvt\\|screen\\|tmux\\|foot\\|alacritty\\|kitty\\|wezterm\\|ghostty\\)"
                     (or (tty-type frame) "")))
-          (send-string-to-terminal
-           (format "\e]12;%s\a" nano-light-foreground) frame)))))
+          (let* ((terminal (frame-terminal frame))
+                 (set-string (format "\e]12;%s\a" nano-light-foreground))
+                 (previous (terminal-parameter terminal 'my/nano-cursor-set-string)))
+            ;; Let Emacs restore the terminal on exit, client detach, and
+            ;; suspension, then reapply the color when the TTY is resumed.
+            (set-terminal-parameter
+             terminal 'tty-mode-reset-strings
+             (cons "\e]112\a"
+                   (delete "\e]112\a"
+                           (terminal-parameter terminal 'tty-mode-reset-strings))))
+            (set-terminal-parameter
+             terminal 'tty-mode-set-strings
+             (cons set-string
+                   (delete set-string
+                           (delete previous
+                                   (terminal-parameter terminal 'tty-mode-set-strings)))))
+            (set-terminal-parameter terminal 'my/nano-cursor-set-string set-string)
+            (send-string-to-terminal set-string frame))))))
 
   (my/nano-terminal-colors)
   (add-hook 'after-make-frame-functions #'my/nano-terminal-colors)
