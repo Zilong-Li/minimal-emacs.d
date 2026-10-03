@@ -7,12 +7,11 @@
            (concat section " " "section time: ")
            (float-time (time-subtract (current-time) my/section-start-time))))
 (message "===================================================================")
-
-(defvar my/elpaca-custom-recipes
+(require 'treesit)
+(defvar my/straight-custom-recipes
   '(
     (meow-tree-sitter :type git :host github :repo "skissue/meow-tree-sitter")
     (consult-tramp :type git :host github :repo "Ladicle/consult-tramp")
-    (nano-elfeed :type git :host github :repo "Zilong-Li/nano-elfeed")
     (nov :type git :host nil :repo "https://depp.brause.cc/nov.el.git")
     (nextflow-mode :type git :host github :repo "edmundmiller/nextflow-mode")
     (ess-smart-equals :type git :host github :repo "genovese/ess-smart-equals")
@@ -20,6 +19,7 @@
     (ultra-scroll :type git :host github :repo "jdtsmith/ultra-scroll")
     (buffer-box :type git :host github :repo "rougier/buffer-box")
     (life-calendar :type git :host github :repo "vshender/emacs-life-calendar")
+    (relative-date :type git :host github :repo "rougier/relative-date")
     (nano-modeline :type git :host github :repo "rougier/nano-modeline" :branch "rewrite")
     (outline-indent :type git :host github :repo "jamescherti/outline-indent.el")
     (kirigami :type git :host github :repo "jamescherti/kirigami.el")
@@ -31,8 +31,8 @@
     (web-mode)
     (codex-ide :type git :host github :repo "dgillis/emacs-codex-ide")))
 
-(dolist (recipe my/elpaca-custom-recipes)
-  (eval (list 'elpaca recipe) t))
+(dolist (recipe my/straight-custom-recipes)
+  (straight-use-package (if (cdr recipe) recipe (car recipe))))
 
 (setq package-list
       '(meow                ; modal editting!!!
@@ -54,20 +54,17 @@
         embark-consult      ; Acting on targets at point
         corfu               ; Completion Overlay Region FUnction
         tempel              ; Simple Templates for Emacs
-        aas                 ; Auto Activating Snippets
         gptel               ; LLM in emacs
         vundo               ; Visually undo!
         nano-theme          ; NANO theme is beautiful! consider the rewrite branch TODO
         nano-agenda         ; NANO Agenda
         hide-mode-line      ; Can toggle default mode-line
-        shrface             ; Extend eww/nov with org-mode features, archive web pages to org files
         htmlize             ; Convert buffer text and decorations to HTML
         engrave-faces       ; better than htmlize and minted
         hl-todo             ; highlight TODO and friends
         f                   ; Modern API for working with files and directories
         rainbow-mode        ; Preview color codes
         xterm-color         ; true color for terms
-        shx                 ; “shell-extras” extends comint-mode eg. M-x shell
         pcmpl-args          ; Enhanced shell completion
         native-complete     ; get native TAB completion working for shell
         transient           ; Transient command menus used by magit and casual
@@ -102,19 +99,17 @@
         smartparens         ; be smart about parens pairs
         exec-path-from-shell; Get environment variables such as $PATH from the shell
         async               ; Emacs Async ops!
-        ready-player        ; An major mode to open media files like the normal
         olivetti            ; Minor mode to auto balance window margins
         fountain-mode       ; Major mode for screenwriting and playwriting
         ))
 
 ;; Install packages that are not yet installed
 (dolist (package package-list)
-  (unless (assq package my/elpaca-custom-recipes)
-    (eval (list 'elpaca package) t)))
+  (unless (assq package my/straight-custom-recipes)
+    (straight-use-package package)))
 
-;; Direct require calls below need packages to be activated first.
-;; Installation is parallel; this is the single synchronization barrier.
-(elpaca-wait)
+;; Straight installs and activates each package before returning, so direct
+;; require calls below can use the packages immediately.
 
 (defun my-ensure (feature)
   "Make sure FEATURE is required."
@@ -243,7 +238,6 @@
      ;; make SPC-u as C-u now
      '("u" . meow-universal-argument)
      ;; frequent keys
-     '("e" . mu4e) ; my email
      '("SPC" . consult-buffer) ; buffer
      '("/" . my/consult-ripgrep) ; search project
      '("0" . delete-window)
@@ -454,7 +448,7 @@
     :doc "Prefix map of C-q s for spelling"
     "o" #'osx-dictionary-search-word-at-point
     "i" #'osx-dictionary-search-input
-    "c" #'flyspell-correct-wrapper
+    "c" #'flyspell-correct-word-before-point
     "d" #'dictionary-lookup-definition
     "s" #'dictionary-search)
 
@@ -516,30 +510,30 @@
   (sp-local-pair 'html-mode "<" ">")
   (sp-local-pair 'web-mode "<" ">")
 
-  (with-eval-after-load 'nano-theme
+  (with-eval-after-load 'nano-theme-support
     ;; Matching pairs
     (set-face-attribute 'sp-pair-overlay-face nil
-                        :background nano-color-subtle
-                        :foreground nil)
+                        :background nano-light-subtle
+                        :foreground 'unspecified)
     ;; Show pair highlights
     (set-face-attribute 'sp-show-pair-match-face nil
-                        :background nil
-                        :foreground nano-color-salient
+                        :background 'unspecified
+                        :foreground nano-light-salient
                         :weight 'bold
                         :underline t)
     ;; Mismatched pairs
     (set-face-attribute 'sp-show-pair-mismatch-face nil
-                        :background nano-color-critical
-                        :foreground nano-color-background
+                        :background nano-light-critical
+                        :foreground nano-light-background
                         :weight 'bold)
     ;; Wrap overlay (when wrapping text)
     (set-face-attribute 'sp-wrap-overlay-face nil
-                        :background nano-color-highlight
-                        :foreground nil)
+                        :background nano-light-highlight
+                        :foreground 'unspecified)
     ;; Tag overlay (for HTML/XML tags)
     (set-face-attribute 'sp-wrap-tag-overlay-face nil
-                        :background nano-color-subtle
-                        :foreground nano-color-salient))
+                        :background nano-light-subtle
+                        :foreground nano-light-salient))
 
   ;; Highlighting Parenthesis
   (show-smartparens-global-mode t)
@@ -572,37 +566,35 @@
 (setq my/section-start-time (current-time))
 
 (use-package nano-theme
+  ;; Theme files use provide-theme rather than providing a Lisp feature.
+  :no-require t
+  :demand t
+  :init
+  (setq nano-fonts-use nil)
   :config
-  (set-face-attribute 'default nil
-                      :family "Roboto Mono"
-                      :weight 'light
-                      :height 160)
+  (load-theme 'nano-light t)
 
-  (set-face-attribute 'bold nil
-                      :weight 'regular)
+  (defun my/nano-fonts (&optional frame)
+    "Apply personal typography to FRAME, including newly created GUI frames."
+    (set-face-attribute 'default frame
+                        :family "Roboto Mono" :weight 'light :height 160)
+    (set-face-attribute 'bold frame :weight 'regular)
+    (set-face-attribute 'italic frame
+                        :family "Iosevka" :weight 'light :slant 'italic)
+    (set-face-attribute 'variable-pitch frame
+                        :family "ETBembo" :weight 'regular :height 240)
+    (when (display-graphic-p frame)
+      (with-selected-frame (or frame (selected-frame))
+        (set-fontset-font t 'unicode
+                          (font-spec :family "RobotoMono Nerd Font"
+                                     :weight 'light :height 160))
+        (set-fontset-font t 'emoji
+                          (font-spec :family "Apple Color Emoji") nil 'prepend)
+        (set-fontset-font t 'emoji
+                          (font-spec :family "Noto Color Emoji") nil 'append))))
 
-  (set-face-attribute 'italic nil
-                      :family "Iosevka"
-                      :weight 'light
-                      :slant 'italic)
-
-  ;; https://github.com/DavidBarts/ET_Bembo
-  (set-face-attribute 'variable-pitch nil
-                      :family "ETBembo"
-                      :weight 'regular
-                      :height 240)
-
-  (set-fontset-font t 'unicode (font-spec
-                                :family "RobotoMono Nerd Font"
-                                :weight 'light
-                                :height 160))
-
-  ;; - Uses `prepend` for primary emoji font, `append` for fallbacks
-  (set-fontset-font t 'emoji (font-spec :family "Apple Color Emoji") nil 'prepend)
-  (set-fontset-font t 'emoji (font-spec :family "Noto Color Emoji") nil 'append)
-  (load-theme 'nano-light t) ;; Sets dark-mode to default
-  ;; (setq nano-fonts-use nil) ;; Allow font overrides elsewhere in config
-  )
+  (my/nano-fonts)
+  (add-hook 'after-make-frame-functions #'my/nano-fonts))
 
 (setq-default fill-column 80                          ; Default line width
               sentence-end-double-space nil           ; Use a single space after dots
@@ -777,35 +769,6 @@
     (add-to-list 'consult-buffer-sources persp-consult-source))
 
 
-  (with-eval-after-load 'ready-player
-    ;; Define an auto-perspective for buffers in ready-player-mode
-    (persp-def-auto-persp "Music"
-                          :parameters '((dont-save-to-file . t))
-                          :buffer-name "^ready-player"
-                          :hooks '(ready-player-major-mode-hook)
-                          :dyn-env '(after-switch-to-buffer-functions ;; prevent recursion
-                                     (persp-add-buffer-on-find-file nil)
-                                     persp-add-buffer-on-after-change-major-mode)
-                          :switch 'frame
-                          ;; :after-match
-                          ;; #'(lambda (state)
-                          ;;     ;; close minibuffers if there is active one
-                          ;;     (when (active-minibuffer-window)
-                          ;;       (abort-recursive-edit))
-                          ;;     (persp--auto-persp-default-after-match state))
-                          ))
-
-  (with-eval-after-load 'mu4e
-    ;; Define an auto-perspective for mu4e buffers
-    (persp-def-auto-persp "Email"
-                          :parameters '((dont-save-to-file . t))
-                          :buffer-name "\\*mu4e-\\(header\\|article\\)"
-                          :dyn-env '(after-switch-to-buffer-functions ;; prevent recursion
-                                     (persp-add-buffer-on-find-file nil)
-                                     persp-add-buffer-on-after-change-major-mode)
-                          :switch 'frame
-                          ))
-
   (with-eval-after-load 'elfeed
     ;; Define an auto-perspective for elfeed buffers
     (persp-def-auto-persp "RSS"
@@ -931,18 +894,15 @@
       (delete-frame)
     (error (save-buffers-kill-terminal))))
 
-;; Default frame settings
-(setq default-frame-alist '((min-height . 1)  (height . 45)
-                            (min-width  . 1)  (width  . 81)
-                            (vertical-scroll-bars . nil)
-                            (internal-border-width . 12)
-                            (left-fringe . 0)
-                            (right-fringe . 0)
-                            (tool-bar-lines . 0)
-                            ))
-
-;; Default frame settings
-(setq initial-frame-alist default-frame-alist)
+;; Merge dimensions and borders with the early transparency/blur settings.
+(dolist (parameter '((min-height . 1) (height . 45)
+                     (min-width . 1) (width . 81)
+                     (vertical-scroll-bars . nil)
+                     (internal-border-width . 12)
+                     (left-fringe . 0) (right-fringe . 0)
+                     (tool-bar-lines . 0)))
+  (setf (alist-get (car parameter) default-frame-alist) (cdr parameter))
+  (setf (alist-get (car parameter) initial-frame-alist) (cdr parameter)))
 
 (bind-key "M-n"        #'my/make-frame)
 (bind-key "C-x C-c"    #'my/kill-emacs)
@@ -2251,51 +2211,7 @@ called at all."
 
   )
 
-(use-package aas
-  :defer t
-  :hook (LaTeX-mode . aas-activate-for-major-mode)
-  :hook (org-mode . aas-activate-for-major-mode)
-  :hook (ess-r-mode . aas-activate-for-major-mode)
-  :config
-  (aas-set-snippets 'text-mode
-                    ;; expand unconditionally
-                    ";e-" "ē")
-  (aas-set-snippets 'ess-r-mode
-                    ";bang" "#!/usr/bin/env Rscript ")
-  (aas-set-snippets 'org-mode
-                    ;; Tempel snippet shorthand form
-                    "amax" '(tempel "\\argmax_{" p "}")
-                    ";ali" '(tempel "\\begin{align}\n" r> n> "\\end{align}")
-                    ";beg" '(tempel "\\begin{" (s env) "}" r> n> "\\end{" (s env) "}")
-                    ";cas" '(tempel "\\begin{cases}\n" r> n> "\\end{cases}")
-                    ";src" '(tempel "#+begin_src " q n r n "#+end_src")
-                    ";fr" '(tempel "\\frac{" p "}{" q "}")
-                    ";eq" '(tempel "\\begin{equation}\n" r> n> "\\end{equation}")
-                    ";;" '(tempel "\\( " r " \\)")
-                    ";ee" '(tempel "\\[ " r " \\]")
-                    "<r" '(tempel "#+begin_src R" n r n "#+end_src")
-                    "<py" '(tempel "#+begin_src Python" n r n "#+end_src")
-                    "<elisp" '(tempel "#+begin_src emacs-lisp" n r n "#+end_src")
-                    )
-  (aas-set-snippets 'latex-mode
-                    ";;" '(tempel "\\(" r "\\)")
-                    ;; set condition!
-                    :cond #'texmathp ; expand only while in math
-                    "supp" "\\supp"
-                    "On" "O(n)"
-                    "O1" "O(1)"
-                    "Olog" "O(\\log n)"
-                    "Olon" "O(n \\log n)"
-                    "amax" '(tempel "\\argmax_{" p "}") ; Tempel snippet shorthand form
-                    ;; bind to functions!
-                    ";ig" #'insert-register
-                    ";call-sin"
-                    (lambda (angle) ; Get as fancy as you like
-                      (interactive "sAngle: ")
-                      (insert (format "%s" (sin (string-to-number angle))))))
-  ;; disable snippets by redefining them with a nil expansion
-  (aas-set-snippets 'latex-mode
-                    "supp" nil))
+
 
 (delete-selection-mode 1)
 
@@ -2420,9 +2336,7 @@ region. Otherwise, upcase the whole region."
   (flyspell-use-meta-tab nil)
   )
 
-(use-package flyspell-correct
-  :after flyspell
-  )
+
 
 
 
@@ -2670,7 +2584,7 @@ region. Otherwise, upcase the whole region."
    (css-ts-mode     . hs-minor-mode)
    (sh-mode         . hs-minor-mode)
    (bash-ts-mode    . hs-minor-mode)
-   (json-mode       . hs-minor-mode)
+   (js-json-mode    . hs-minor-mode)
    (json-ts-mode    . hs-minor-mode)
    (html-mode       . hs-minor-mode)
    (perl-mode       . hs-minor-mode)))
@@ -2712,11 +2626,11 @@ region. Otherwise, upcase the whole region."
   (let* ((fill-column (- fill-column (my/calc-offset-on-org-level))))
     (org-auto-fill-function)))
 
+(setq org-directory "~/Dropbox/Org/GTD")
 (use-package org
   :defer t
   :custom
   (org-yank-image-save-method "~/Dropbox/Org/Images")
-  (org-directory "~/Dropbox/Org/GTD")
   (org-ellipsis " …")                  ; Nicer ellipsis
   (org-tags-column 0)              ; Tags next to header title
   (org-agenda-tags-column 0)       ;
@@ -2880,19 +2794,6 @@ region. Otherwise, upcase the whole region."
 (setq my/section-start-time (current-time))
 
 
-
-(with-eval-after-load 'org
-  (require 'edraw-org)
-  (edraw-org-setup-default))
-
-
-
-
-
-
-
-
-
 (defun log-todo-next-creation-date (&rest ignore)
   "Log NEXT creation time in the property drawer under the key 'ACTIVATED'"
   (when (and (string= (org-get-todo-state) "NEXT")
@@ -2909,19 +2810,13 @@ region. Otherwise, upcase the whole region."
   (org-mode . toc-org-mode)
   )
 
-(use-package ox-extra
-  :defer t
-  :after org
-  :custom
-  (ox-extras-activate '(ignore-headlines))
-  )
+
 
 (defun my/org-mode-hook ()
-  (setq fill-paragraph-function #'my/org-fill-paragraph
-        normal-auto-fill-function #'my/org-auto-fill-function))
+  (setq-local fill-paragraph-function #'my/org-fill-paragraph
+              normal-auto-fill-function #'my/org-auto-fill-function))
 
 (with-eval-after-load 'org
-  (add-hook 'org-load-hook 'my/org-mode-hook)
   (add-hook 'org-mode-hook 'my/org-mode-hook)
   )
 
@@ -3114,109 +3009,18 @@ See also `org-save-all-org-buffers'"
             :filter-return #'my/org-agenda-highlight-todo)
 
 
-(defun my/svg-tag-timestamp (&rest args)
-  "Create a timestamp SVG tag for the time at point."
-
-  (interactive)
-  (let ((inhibit-read-only t))
-
-    (goto-char (point-min))
-    (while (search-forward-regexp
-            "\\(\([0-9]/[0-9]\):\\)" nil t)
-              (set-text-properties (match-beginning 1) (match-end 1)
-                             `(display ,(svg-tag-make "ANYTIME"
-                                                      :face 'nano-faded
-                                                      :inverse nil
-                                                      :padding 3 :alignment 0))))
-
-    (goto-char (point-min))
-    (while (search-forward-regexp
-            "\\([0-9]+:[0-9]+\\)\\(\\.+\\)" nil t)
-
-              (set-text-properties (match-beginning 1) (match-end 2)
-                             `(display ,(svg-tag-make (match-string 1)
-                                                       :face 'nano-faded
-                                                       :margin 4 :alignment 0))))
-
-    (goto-char (point-min))
-    (while (search-forward-regexp
-            "\\([0-9]+:[0-9]+\\)\\(\\.*\\)" nil t)
-
-              (set-text-properties (match-beginning 1) (match-end 2)
-                             `(display ,(svg-tag-make (match-string 1)
-                                                      :face 'nano-default
-                                                      :inverse t
-                                                      :margin 4 :alignment 0))))
-    (goto-char (point-min))
-    (while (search-forward-regexp
-            "\\([0-9]+:[0-9]+\\)\\(-[0-9]+:[0-9]+\\)" nil t)
-      (let* ((t1 (parse-time-string (match-string 1)))
-             (t2 (parse-time-string (substring (match-string 2) 1)))
-             (t1 (+ (* (nth 2 t1) 60) (nth 1 t1)))
-             (t2 (+ (* (nth 2 t2) 60) (nth 1 t2)))
-             (d  (- t2 t1)))
-
-        (set-text-properties (match-beginning 1) (match-end 1)
-                                `(display ,(svg-tag-make (match-string 1)
-                                                         :face 'nano-faded
-                                                         :crop-right t)))
-        ;; 15m: ¼, 30m:½, 45m:¾
-        (if (< d 60)
-             (set-text-properties (match-beginning 2) (match-end 2)
-                                  `(display ,(svg-tag-make (format "%2dm" d)
-                                                           :face 'nano-faded
-                                                           :crop-left t :inverse t)))
-           (set-text-properties (match-beginning 2) (match-end 2)
-                                `(display ,(svg-tag-make (format "%1dH" (/ d 60))
-                                                         :face 'nano-faded
-                                                         :crop-left t :inverse t
-                                                         :padding 2 :alignment 0))))))))
-
-
-(add-hook 'org-agenda-mode-hook #'my/svg-tag-timestamp)
-(advice-add 'org-agenda-redo :after #'my/svg-tag-timestamp)
-
 (defun my/org-agenda-custom-date ()
-  (interactive)
-  (let* ((timestamp (org-entry-get nil "TIMESTAMP"))
-         (timestamp (or timestamp (org-entry-get nil "SCHEDULED")))
-         (timestamp (or timestamp (org-entry-get nil "DEADLINE"))))
+  "Return the entry's date without requiring SVG packages."
+  (let ((timestamp (or (org-entry-get nil "TIMESTAMP")
+                       (org-entry-get nil "SCHEDULED")
+                       (org-entry-get nil "DEADLINE"))))
     (if timestamp
-        (let* ((delta (- (org-time-string-to-absolute (org-read-date nil nil timestamp))
-                         (org-time-string-to-absolute (org-read-date nil nil ""))))
-               (delta (/ (+ 1 delta) 30.0))
-               (face (cond ;; ((< delta 0.25) 'nano-popout)
-                           ;; ((< delta 0.50) 'nano-salient)
-                           ((< delta 1.00) 'nano-default)
-                           (t 'nano-faded))))
-          (concat
-           (propertize " " 'face nil
-                       'display (svg-lib-progress-pie
-                                 delta nil
-                                 :background (face-background face nil 'default)
-                                 :foreground (face-foreground face)
-                                 :margin 0 :stroke 2 :padding 1))
-           " "
-           (propertize
-            (format-time-string "%d/%m" (org-time-string-to-time timestamp))
-            'face 'nano-popout)))
+        (propertize (format-time-string "%d/%m"
+                                        (org-time-string-to-time timestamp))
+                    'face 'nano-popout)
       "     ")))
 
-(defun org-agenda-show-svg ()
-  (let* ((case-fold-search nil)
-         (keywords (mapcar #'svg-tag--build-keywords svg-tag--active-tags))
-         (keyword (car keywords)))
-    (while keyword
-      (save-excursion
-        (while (re-search-forward (nth 0 keyword) nil t)
-          (overlay-put (make-overlay
-                        (match-beginning 0) (match-end 0))
-                       'display  (nth 3 (eval (nth 2 keyword)))) ))
-      (pop keywords)
-      (setq keyword (car keywords)))))
-(add-hook 'org-agenda-finalize-hook #'org-agenda-show-svg)
-
-;; Package installation is declared in my/elpaca-custom-recipes above.
+;; Package installation is declared in my/straight-custom-recipes above.
 
 (use-package org-better-agenda)
 
@@ -3266,9 +3070,7 @@ See also `org-save-all-org-buffers'"
         ,(concat "* TODO %?\n"))
         ("m" "Meeting" entry  (file+headline "life.org" "Events")
         ,(concat "* %? :meeting:\n"))
-        ("@" "Inbox [mu4e]" entry (file "inbox.org")
-        ,(concat "* IDEA %?\n"
-                 "/Entered on/ %U \n\n Reply to \"%a\" \n"))))
+        ))
 
 (bind-key "C-c c" #'org-capture)
 
@@ -3793,7 +3595,6 @@ to be `:text'. "
           (js-mode            . js-ts-mode)
           (javascript-mode    . js-ts-mode)
           (js-json-mode       . json-ts-mode)
-          (json-mode          . json-ts-mode)
           (java-mode          . java-ts-mode)
           ;; (lua-mode           . lua-ts-mode)
           ;; (go-mode            . go-ts-mode)
@@ -3884,8 +3685,8 @@ to be `:text'. "
 (use-package yaml-mode
   :mode "\\.yaml\\'")
 
-(use-package json-mode
-  :mode "\\.json\\'")
+(use-package js
+  :mode ("\\.json\\'" . js-json-mode))
 
 (use-package python
   :bind
@@ -3982,7 +3783,7 @@ to be `:text'. "
 
   (defun my/ess-R-object-popup (r-func)
     "R-FUNC: The R function to use on the object.
-Run R-FUN for object at point, and display results in a popup."
+Run R-FUNC for object at point, and display results in a help window."
     (let ((objname (current-word))
           (tmpbuf (get-buffer-create "**ess-R-object-popup**")))
       (if objname
@@ -3993,7 +3794,7 @@ Run R-FUN for object at point, and display results in a popup."
                   (progn
                     (ess-command (concat r-func "(" objname ")\n") tmpbuf)
                     (let ((bs (my/read-into-string tmpbuf)))
-                      (popup-tip bs)))))))
+                      (with-help-window "*ESS Object*" (princ bs))))))))
       (kill-buffer tmpbuf)))
 
   (defun my/ess-R-object-popup-fed ()
@@ -4010,7 +3811,6 @@ Run R-FUN for object at point, and display results in a popup."
 
   :config
 
-  (require 'popup)
   (require 'ess-r-mode)
   (require 'ess-r-package) ;; quick r package setup
 
@@ -4490,11 +4290,7 @@ Run R-FUN for object at point, and display results in a popup."
           (url-copy-file url dest t)
           (message "Saved: %s" dest)))))
 
-  :hook
-  (eww-after-render . shrface-mode)
-
   :config
-  (require 'shrface)
   (require 'subr-x)
 
   (setq eww-search-prefix "https://duckduckgo.com/html/search?q=")
@@ -4534,35 +4330,9 @@ Run R-FUN for object at point, and display results in a popup."
                :height 0.9
                :box `(:line-width 1 :color ,(face-background 'default))))))
 
-(use-package shrface
-  :defer t
-  :bind (:map eww-mode-map
-              ("M-g o" . shrface-headline-consult)
-              ("C-c C-o" . shrface-occur))
-  :config
-  (setopt shrface-href-versatile t)
-  (shrface-basic)
-  ;; (shrface-trial) ; experimental features
-  ;; (shrface-default-keybindings)
-  (require 'shr-tag-pre-highlight)
-  (add-to-list 'shr-external-rendering-functions
-               '(pre . shr-tag-pre-highlight))
-  )
 
-(use-package ready-player
-  :custom
-  (ready-player-set-global-bindings nil)
-  (ready-player-open-externally-icon "▷")
-  (ready-player-search-icon "")
-  ;; :bind ("C-c l p" . ready-player-open-my-media-collection) ; this messed up the dired
-  :config
-  (setq ready-player-my-media-collection-location "~/Dropbox/Zll/Datahub/003-Audios")
-  (define-key ready-player-major-mode-map (kbd "<return>") 'ready-player-toggle-play-stop)
-  (when (memq system-type '(darwin))
-    (set-fontset-font t nil "SF Pro Display" nil 'append)
-    (ready-player-macos-use-sf-symbols))
-  (ready-player-mode +1)
-  )
+
+
 
 (defvar piper-binary-path "~/.local/bin/piper")
 ;; (defvar piper-model-path "~/.local/share/piper/models/en_GB-cori-high.onnx")
@@ -4676,39 +4446,7 @@ GENERIC browser defined by `browse-url-generic-program'."
   (setq rmh-elfeed-org-files (list (concat user-emacs-directory "elfeed.org") ))
   )
 
-(use-package nano-elfeed
-  :after elfeed
-  :init
-  (setq nano-elfeed-icon-path (expand-file-name "icons/" (file-name-directory (locate-library "nano-elfeed"))))
 
-  :config
-  (setq nano-elfeed-icons
-        `(("RSS"             . ,(nano-elfeed-make-icon "default"))
-          ("BioRxiv Bioinformatics"   . ,(nano-elfeed-make-icon "biorxiv"))
-          ("BioRxiv Genetics"   . ,(nano-elfeed-make-icon "biorxiv"))
-          ("BioRxiv Genomics"   . ,(nano-elfeed-make-icon "biorxiv"))
-          ("Science"           . ,(nano-elfeed-make-icon "science"))
-          ("Nature"           . ,(nano-elfeed-make-icon "nature"))
-          ("Nature Genetics"           . ,(nano-elfeed-make-icon "nature"))
-          ("Nature Methods"           . ,(nano-elfeed-make-icon "nature"))
-          ("Nature Medicine"           . ,(nano-elfeed-make-icon "nature"))
-          ("Nature Biotechnology"           . ,(nano-elfeed-make-icon "nature"))
-          ("eLife"           . ,(nano-elfeed-make-icon "elife"))
-          ("eLife Genetics Genomics"           . ,(nano-elfeed-make-icon "elife"))
-          ("eLife Evolutionary Biology"           . ,(nano-elfeed-make-icon "elife"))
-          ("Emacs"           . ,(nano-elfeed-make-icon "reddit"))
-          ("Emacs org-mode"  . ,(nano-elfeed-make-icon "reddit"))
-          ("Paris Review"    . ,(nano-elfeed-make-icon "parisreview"))
-          ("McSweeney's"    . ,(nano-elfeed-make-icon "mcsweeneys"))
-          ("Aeon"            . ,(nano-elfeed-make-icon "aeon"))
-          ("Slashdot"        . ,(nano-elfeed-make-icon "slashdot"))
-          ("Ars Technica"    . ,(nano-elfeed-make-icon "ars-technica"))
-          ("Boing Boing"     . ,(nano-elfeed-make-icon "boing-boing"))
-          ("Plos Comp.Bio"   . ,(nano-elfeed-make-icon "plos"))
-          ("Quanta"          . ,(nano-elfeed-make-icon "quanta"))
-          ))
-
-  )
 
 
 (defun my/jump-to-matching-paren ()
@@ -4730,7 +4468,7 @@ GENERIC browser defined by `browse-url-generic-program'."
 
 (define-key help-mode-map (kbd "Q") 'kill-buffer-and-window)
 
-;; Package installation is declared in my/elpaca-custom-recipes above.
+;; Package installation is declared in my/straight-custom-recipes above.
 
 (use-package web-mode
   :mode (("\\.html?\\'" . web-mode)
@@ -4789,10 +4527,13 @@ GENERIC browser defined by `browse-url-generic-program'."
   :preface
 
   (defun my/gptel-remove-extra-whitespace (beg end)
+    "Collapse excess blank lines within the response from BEG to END."
     (save-excursion
-      (goto-char beg)
-      (while (re-search-forward "\n\n\n+" end t)
-        (replace-match "\n\n"))))
+      (save-restriction
+        (narrow-to-region beg end)
+        (goto-char (point-min))
+        (while (re-search-forward "\n\n\n+" nil t)
+          (replace-match "\n\n")))))
 
   (defun my/gptel-previous-prompt ()
     (interactive)
@@ -4844,9 +4585,8 @@ GENERIC browser defined by `browse-url-generic-program'."
 
   (make-variable-buffer-local 'gptel-context)
 
-  (add-all-to-list 'gptel-post-response-functions
-                   #'my/gptel-next-prompt
-                   #'my/gptel-remove-extra-whitespace)
+  (add-hook 'gptel-post-response-functions #'my/gptel-remove-extra-whitespace)
+  (add-hook 'gptel-post-response-functions #'my/gptel-next-prompt 10)
 
 
   )
