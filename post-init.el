@@ -2559,7 +2559,8 @@ region. Otherwise, upcase the whole region."
     :config
     (use-package git-commit
       :custom
-      (git-commit-major-mode 'markdown-mode)
+      ;; Commit messages need no Markdown parsing or fontification while typing.
+      (git-commit-major-mode 'text-mode)
       (git-commit-setup-hook
        '(git-commit-save-message
          git-commit-turn-on-auto-fill
