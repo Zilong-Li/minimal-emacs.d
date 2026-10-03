@@ -574,16 +574,44 @@
   :config
   (load-theme 'nano-light t)
 
+  (defun my/nano-terminal-colors (&optional frame)
+    "Apply NANO's explicit light colors to terminal FRAME.
+Like Spartan's `nano-install-theme', set the default face directly so
+the terminal's own dark background cannot select the dark face palette."
+    (let ((frame (or frame (selected-frame))))
+      (when (and (not (display-graphic-p frame))
+                 (memq 'nano-light custom-enabled-themes))
+        (set-frame-parameter frame 'background-mode 'light)
+        (set-face-attribute 'default frame
+                            :foreground nano-light-foreground
+                            :background nano-light-background)
+        (frame-set-background-mode frame)
+        (set-face-attribute 'cursor frame
+                            :background nano-light-foreground
+                            :foreground nano-light-background)
+        (set-frame-parameter frame 'cursor-color nano-light-foreground)
+        ;; TTY hardware cursors are drawn by the terminal, outside Emacs faces.
+        ;; OSC 12 sets their color in xterm-compatible terminals.
+        (when (and (not noninteractive)
+                   (string-match-p
+                    "\\`\\(?:xterm\\|rxvt\\|screen\\|tmux\\|foot\\|alacritty\\|kitty\\|wezterm\\|ghostty\\)"
+                    (or (tty-type frame) "")))
+          (send-string-to-terminal
+           (format "\e]12;%s\a" nano-light-foreground) frame)))))
+
+  (my/nano-terminal-colors)
+  (add-hook 'after-make-frame-functions #'my/nano-terminal-colors)
+
   (defun my/nano-fonts (&optional frame)
     "Apply personal typography to FRAME, including newly created GUI frames."
-    (set-face-attribute 'default frame
-                        :family "Roboto Mono" :weight 'light :height 160)
-    (set-face-attribute 'bold frame :weight 'regular)
-    (set-face-attribute 'italic frame
-                        :family "Iosevka" :weight 'light :slant 'italic)
-    (set-face-attribute 'variable-pitch frame
-                        :family "ETBembo" :weight 'regular :height 240)
     (when (display-graphic-p frame)
+      (set-face-attribute 'default frame
+                        :family "Roboto Mono" :weight 'light :height 160)
+      (set-face-attribute 'bold frame :weight 'regular)
+      (set-face-attribute 'italic frame
+                        :family "Iosevka" :weight 'light :slant 'italic)
+      (set-face-attribute 'variable-pitch frame
+                        :family "ETBembo" :weight 'regular :height 240)
       (with-selected-frame (or frame (selected-frame))
         (set-fontset-font t 'unicode
                           (font-spec :family "RobotoMono Nerd Font"
@@ -709,14 +737,17 @@
 
   :config
 
+  (defun my/persp-skip-save-buffer-p (buffer)
+    "Exclude Magit and other transient BUFFERs from saved perspectives."
+    (with-current-buffer buffer
+      (or (string-match-p "\\`\\*?[Ee]diff" (buffer-name))
+          (derived-mode-p 'magit-mode 'magit-repolist-mode)
+          ;; Also cover Magit modes outside the magit-mode hierarchy.
+          (string-prefix-p "magit-" (symbol-name major-mode))
+          (memq major-mode '(ediff-mode comint-mode dired-mode PDFView)))))
+
   (add-to-list 'persp-filter-save-buffers-functions
-               (lambda (b)
-                 "Ignore buffers based on criteria."
-                 (let ((bname (buffer-name b)))
-                   (or (string-match-p "\\`\\*?[Ee]diff" bname)
-                       ;; Exclude by major mode
-                       (with-current-buffer b
-                         (memq major-mode '(magit-status-mode ediff-mode comint-mode dired-mode PDFView)))))))
+               #'my/persp-skip-save-buffer-p)
 
   (defun my/persp-add-buffer (&optional buffer)
     "Add BUFFER to the current perspective when `persp-mode' is active."
