@@ -7,7 +7,8 @@
            (concat section " " "section time: ")
            (float-time (time-subtract (current-time) my/section-start-time))))
 (message "===================================================================")
-(require 'treesit)
+;; Load native tree-sitter and personal setup before the Meow integration.
+(require 'my-treesit)
 
 
 (defvar my/straight-custom-recipes
@@ -21,9 +22,9 @@
     (ultra-scroll :type git :host github :repo "jdtsmith/ultra-scroll")
     (buffer-box :type git :host github :repo "rougier/buffer-box")
     (life-calendar :type git :host github :repo "vshender/emacs-life-calendar")
-    (nano-elfeed :type git :host github :repo "Zilong-Li/nano-elfeed")
     (relative-date :type git :host github :repo "rougier/relative-date")
     (nano-modeline :type git :host github :repo "rougier/nano-modeline" :branch "rewrite")
+    (nano-elfeed :type git :host github :repo "Zilong-Li/nano-elfeed")
     (outline-indent :type git :host github :repo "jamescherti/outline-indent.el")
     (kirigami :type git :host github :repo "jamescherti/kirigami.el")
     (org-timegrid :type git :host github :repo "Gleek/org-timegrid")
@@ -344,6 +345,7 @@
   )
 
 (use-package meow-tree-sitter
+  :if (treesit-available-p)
   :defer t
   :after (meow treesit)
   :config
@@ -3613,75 +3615,6 @@ to be `:text'. "
 
 (setq my/section-start-time (current-time))
 
-(use-package treesit
-  :defer t
-  :custom
-  (treesit-font-lock-level 3) ; in default
-  :init
-
-  (setq major-mode-remap-alist
-        '((bash-mode          . bash-ts-mode)
-          (c-mode             . c-ts-mode)
-          (c++-mode           . c++-ts-mode)
-          (cmake-mode         . cmake-ts-mode)
-          (make-mode          . make-ts-mode)
-          (css-mode           . css-ts-mode)
-          (js-mode            . js-ts-mode)
-          (javascript-mode    . js-ts-mode)
-          (js-json-mode       . json-ts-mode)
-          (java-mode          . java-ts-mode)
-          ;; (lua-mode           . lua-ts-mode)
-          ;; (go-mode            . go-ts-mode)
-          (python-mode        . python-ts-mode)
-          (ruby-mode          . ruby-ts-mode)
-                                        ;        (rust-mode          . rust-ts-mode)
-          (sh-mode            . bash-ts-mode)
-          (tsx-tsx-mode       . tsx-ts-mode) ;; in case a third-party defines it
-          (typescript-mode    . typescript-ts-mode)
-          (conf-toml-mode     . toml-ts-mode)
-          (yaml-mode          . yaml-ts-mode)))
-
-  ;; Optional: where compiled grammars are stored (Emacs also checks here by default)
-  ;; (add-to-list 'treesit-extra-load-path (expand-file-name "tree-sitter" user-emacs-directory))
-  (setq treesit-language-source-alist
-        '((bash        . ("https://github.com/tree-sitter/tree-sitter-bash" "v0.23.1" "src"))
-          (c           . ("https://github.com/tree-sitter/tree-sitter-c"))
-          (cpp         . ("https://github.com/tree-sitter/tree-sitter-cpp"))
-          (cmake       . ("https://github.com/uyha/tree-sitter-cmake"))
-          (css         . ("https://github.com/tree-sitter/tree-sitter-css"))
-          (elisp       . ("https://github.com/Wilfred/tree-sitter-elisp"))
-          (go          . ("https://github.com/tree-sitter/tree-sitter-go"))
-          (html        . ("https://github.com/tree-sitter/tree-sitter-html"))
-          (java        . ("https://github.com/tree-sitter/tree-sitter-java"))
-          (javascript  . ("https://github.com/tree-sitter/tree-sitter-javascript" "master" "src"))
-          (json        . ("https://github.com/tree-sitter/tree-sitter-json"))
-          ;; (lua         . ("https://github.com/Azganoth/tree-sitter-lua"))
-          (make        . ("https://github.com/alemuller/tree-sitter-make"))
-          (markdown    . ("https://github.com/ikatyang/tree-sitter-markdown"))
-          (python      . ("https://github.com/tree-sitter/tree-sitter-python" "v0.23.6" "src"))
-          (r           . ("https://github.com/r-lib/tree-sitter-r"))
-          (ruby        . ("https://github.com/tree-sitter/tree-sitter-ruby"))
-          (rust        . ("https://github.com/tree-sitter/tree-sitter-rust"))
-          (toml        . ("https://github.com/tree-sitter/tree-sitter-toml"))
-          (tsx         . ("https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src"))
-          (typescript  . ("https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src"))
-          (typst        . ("https://github.com/uben0/tree-sitter-typst"))
-          (yaml        . ("https://github.com/ikatyang/tree-sitter-yaml"))
-          (zig         . ("https://github.com/maxxnino/tree-sitter-zig"))))
-
-  (defun my/treesit-install-all-missing ()
-    "Install all grammars from `treesit-language-source-alist' that are missing."
-    (interactive)
-    (dolist (entry treesit-language-source-alist)
-      (let ((lang (car entry)))
-        (unless (treesit-language-available-p lang)
-          (ignore-errors (treesit-install-language-grammar lang 'interactive)))))
-    )
-
-  )
-
-
-
 (use-package sh-script
   :defer t
   :init
@@ -3717,7 +3650,7 @@ to be `:text'. "
   )
 
 (use-package yaml-mode
-  :mode "\\.yaml\\'")
+  :mode "\\.ya?ml\\'")
 
 (use-package js
   :mode ("\\.json\\'" . js-json-mode))

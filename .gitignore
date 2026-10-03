@@ -14,3 +14,8 @@
 !templates
 !PERSONAL.md
 !tangle.el
+!lisp/
+!lisp/my-treesit.el
+!lisp/TREE-SITTER.md
+!tests/
+!tests/my-treesit-tests.el
