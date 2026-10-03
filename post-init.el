@@ -8,6 +8,8 @@
            (float-time (time-subtract (current-time) my/section-start-time))))
 (message "===================================================================")
 (require 'treesit)
+
+
 (defvar my/straight-custom-recipes
   '(
     (meow-tree-sitter :type git :host github :repo "skissue/meow-tree-sitter")
@@ -19,6 +21,7 @@
     (ultra-scroll :type git :host github :repo "jdtsmith/ultra-scroll")
     (buffer-box :type git :host github :repo "rougier/buffer-box")
     (life-calendar :type git :host github :repo "vshender/emacs-life-calendar")
+    (nano-elfeed :type git :host github :repo "Zilong-Li/nano-elfeed")
     (relative-date :type git :host github :repo "rougier/relative-date")
     (nano-modeline :type git :host github :repo "rougier/nano-modeline" :branch "rewrite")
     (outline-indent :type git :host github :repo "jamescherti/outline-indent.el")
@@ -28,7 +31,6 @@
     (ghostel :type git :host github :repo "dakra/ghostel")
     (cuda-mode :type git :host github :repo "chachi/cuda-mode")
     (pdf-tools :host github :repo "vedang/pdf-tools")
-    (web-mode)
     (codex-ide :type git :host github :repo "dgillis/emacs-codex-ide")))
 
 (dolist (recipe my/straight-custom-recipes)
@@ -95,6 +97,7 @@
         julia-mode          ; Julia
         rust-mode           ; Rust
         go-mode             ; Golang
+        web-mode            ; web-mode
         devdocs             ; doc viewer by querying devdocs.io
         smartparens         ; be smart about parens pairs
         exec-path-from-shell; Get environment variables such as $PATH from the shell
@@ -4403,7 +4406,6 @@ Otherwise send from point to end of buffer."
 
 (use-package elfeed
   :commands elfeed
-
   :bind (("C-c l r" . elfeed)
          :map elfeed-search-mode-map
          ("o" . timu-elfeed-search-other-window)
@@ -4412,14 +4414,12 @@ Otherwise send from point to end of buffer."
          ("x" . timu-elfeed-show-visit-xwidget)
          )
   :config
-
   (add-hook 'elfeed-show-mode-hook 'variable-pitch-mode)
   (define-key elfeed-search-mode-map "d" (elfeed-tag-selection-as 'starred))
   (define-key elfeed-search-mode-map "l" (elfeed-tag-selection-as 'readlater))
   (define-key elfeed-search-mode-map "i" (elfeed-tag-selection-as 'important))
 
   :init
-
   (defun my/elfeed ()
     "Open Elfeed in a new frame."
     (interactive)
@@ -4438,14 +4438,12 @@ Otherwise send from point to end of buffer."
   (defun timu-elfeed-search-other-window ()
     "Browse `elfeed' entry in the other window.
 Credit: https://protesilaos.com/dotemacs"
-
     (interactive)
     (let* ((entry (if (eq major-mode 'elfeed-show-mode)
                       elfeed-show-entry
                     (elfeed-search-selected :ignore-region)))
            (link (elfeed-entry-link entry))
            (win (selected-window)))
-
       (with-current-buffer (get-buffer "*elfeed-search*")
         (unless (one-window-p)              ; experimental
           (delete-other-windows win))
@@ -4465,9 +4463,6 @@ GENERIC browser defined by `browse-url-generic-program'."
         (if generic
             (browse-url link)
           (xwidget-webkit-browse-url link)))))
-
-  
-
   )
 
 (use-package elfeed-org
@@ -4478,6 +4473,38 @@ GENERIC browser defined by `browse-url-generic-program'."
   )
 
 
+(use-package nano-elfeed
+  :after elfeed
+  :init
+  (setq nano-elfeed-icon-path (concat straight-base-dir "straight/repos/nano-elfeed/icons"))
+  :config
+  (setq nano-elfeed-icons
+        `(("RSS"             . ,(nano-elfeed-make-icon "default"))
+          ("BioRxiv Bioinformatics"   . ,(nano-elfeed-make-icon "biorxiv"))
+          ("BioRxiv Genetics"   . ,(nano-elfeed-make-icon "biorxiv"))
+          ("BioRxiv Genomics"   . ,(nano-elfeed-make-icon "biorxiv"))
+          ("Science"           . ,(nano-elfeed-make-icon "science"))
+          ("Nature"           . ,(nano-elfeed-make-icon "nature"))
+          ("Nature Genetics"           . ,(nano-elfeed-make-icon "nature"))
+          ("Nature Methods"           . ,(nano-elfeed-make-icon "nature"))
+          ("Nature Medicine"           . ,(nano-elfeed-make-icon "nature"))
+          ("Nature Biotechnology"           . ,(nano-elfeed-make-icon "nature"))
+          ("eLife"           . ,(nano-elfeed-make-icon "elife"))
+          ("eLife Genetics Genomics"           . ,(nano-elfeed-make-icon "elife"))
+          ("eLife Evolutionary Biology"           . ,(nano-elfeed-make-icon "elife"))
+          ("Emacs"           . ,(nano-elfeed-make-icon "reddit"))
+          ("Emacs org-mode"  . ,(nano-elfeed-make-icon "reddit"))
+          ("Paris Review"    . ,(nano-elfeed-make-icon "parisreview"))
+          ("McSweeney's"    . ,(nano-elfeed-make-icon "mcsweeneys"))
+          ("Aeon"            . ,(nano-elfeed-make-icon "aeon"))
+          ("Slashdot"        . ,(nano-elfeed-make-icon "slashdot"))
+          ("Ars Technica"    . ,(nano-elfeed-make-icon "ars-technica"))
+          ("Boing Boing"     . ,(nano-elfeed-make-icon "boing-boing"))
+          ("Plos Comp.Bio"   . ,(nano-elfeed-make-icon "plos"))
+          ("Quanta"          . ,(nano-elfeed-make-icon "quanta"))
+          ))
+
+  )
 
 
 (defun my/jump-to-matching-paren ()
