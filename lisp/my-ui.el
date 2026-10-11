@@ -105,8 +105,6 @@ cannot select the dark face palette."
                  '((nano-modeline-format-default prog-mode-hook text-mode-hook)
                    (nano-modeline-format-org-capture org-capture-mode-hook)
                    (nano-modeline-format-gptel gptel-mode-hook)
-                   (nano-modeline-format-elfeed-search elfeed-search-mode-hook)
-                   (nano-modeline-format-elfeed-entry elfeed-show-mode-hook)
                    (nano-modeline-format-terminal term-mode-hook ghostel-mode-hook
                                                   eshell-mode-hook shell-mode-hook)
                    (my/nano-modeline-format-pdf-view pdf-view-mode-hook)))
@@ -251,16 +249,7 @@ perspective.  Always hide noisy internal buffers."
                        (lambda () (consult--buffer-query
                                    :sort 'visibility
                                    :predicate #'my/persp-buffer-filter-predicate
-                                   :as #'buffer-name)))))
-
-  (with-eval-after-load 'elfeed
-    (persp-def-auto-persp "RSS"
-                          :parameters '((dont-save-to-file . t))
-                          :buffer-name "^\\*elfeed-\\(search\\|entry\\)"
-                          :dyn-env '(after-switch-to-buffer-functions ; prevent recursion
-                                     (persp-add-buffer-on-find-file nil)
-                                     persp-add-buffer-on-after-change-major-mode)
-                          :switch 'frame)))
+                                   :as #'buffer-name))))))
 
 (provide 'my-ui)
 ;;; my-ui.el ends here

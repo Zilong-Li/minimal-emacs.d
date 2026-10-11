@@ -4,7 +4,7 @@
 (require 'my-ui)          ; Theme, fonts, header line, windows, perspectives
 (require 'my-keys)        ; Meow, its paren state and the C-q prefix
 (require 'my-completion)  ; Vertico, Orderless, Marginalia, Consult, Corfu, Tempel
-(require 'my-tools)       ; Dired, projects, Git, shells, web, LLM, RSS
+(require 'my-tools)       ; Dired, projects, Git, shells, web, LLM
 (require 'my-prog)        ; Tree-sitter, Eglot, languages, folding
 (require 'my-org)         ; Org, agenda, capture, export
 

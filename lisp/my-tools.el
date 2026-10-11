@@ -634,56 +634,6 @@ Without VALUES delete them."
   :custom
   (codex-ide-fast "on"))
 
-;;; RSS
-
-(use-package elfeed
-  :ensure t
-  :bind (("C-c l r" . elfeed)
-         :map elfeed-search-mode-map
-         ("o" . my/elfeed-search-other-window)
-         ("d" . my/elfeed-toggle-starred)
-         ("l" . my/elfeed-toggle-readlater)
-         ("i" . my/elfeed-toggle-important)
-         :map elfeed-show-mode-map
-         ("M-." . dictionary-lookup-definition)
-         ("x" . my/elfeed-show-visit-xwidget))
-  :hook (elfeed-show-mode . variable-pitch-mode)
-  :config
-  (defun my/elfeed-load-feeds ()
-    "Read `elfeed-feeds' and feed titles from the Org links in elfeed.org.
-Each link heading's tags become the feed's tags."
-    (with-temp-buffer
-      (insert-file-contents (locate-user-emacs-file "elfeed.org"))
-      (setq elfeed-feeds nil)
-      (while (re-search-forward
-              "^\\*+ +\\[\\[\\([^]]+\\)\\]\\[\\([^]]+\\)\\]\\][ \t]*\\(:[^ \t\n]+:\\)?" nil t)
-        (let ((url (match-string 1))
-              (title (match-string 2))
-              (tags (split-string (or (match-string 3) "") ":" t)))
-          (push (cons url (mapcar #'intern tags)) elfeed-feeds)
-          (elfeed-meta--put (elfeed-db-get-feed url) :title title))))
-    (setq elfeed-feeds (nreverse elfeed-feeds)))
-  (advice-add 'elfeed :before #'my/elfeed-load-feeds)
-
-  (dolist (tag '(starred readlater important))
-    (defalias (intern (format "my/elfeed-toggle-%s" tag))
-      (lambda () (interactive) (elfeed-search-toggle-all tag))
-      (format "Toggle the %s tag on the selected entries." tag)))
-
-  (defun my/elfeed-search-other-window ()
-    "Show the selected entry in the other window."
-    (interactive)
-    (let ((entry (elfeed-search-selected :ignore-region)))
-      (delete-other-windows)
-      (select-window (split-window-right))
-      (elfeed-search-show-entry entry)))
-
-  (defun my/elfeed-show-visit-xwidget (&optional generic)
-    "Visit the entry with xwidget-webkit, or with the GENERIC browser."
-    (interactive "P")
-    (when-let* ((link (elfeed-entry-link elfeed-show-entry)))
-      (if generic (browse-url link) (xwidget-webkit-browse-url link)))))
-
 ;;; Speech and screenshots
 
 (defvar my/piper-binary "~/.local/bin/piper")

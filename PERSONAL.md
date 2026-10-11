@@ -30,17 +30,16 @@ updates can be applied independently.
 - `lisp/my-keys.el`: Meow, structural editing, avy, global keys, `C-q` prefix.
 - `lisp/my-completion.el`: Vertico, Orderless, Marginalia, Consult, Corfu, Tempel.
 - `lisp/my-tools.el`: Dired, projects, TRAMP, Magit, shells, Ghostel, EWW,
-  PDF Tools, gptel, codex-ide, Elfeed, speech and screenshots.
+  PDF Tools, gptel, codex-ide, speech and screenshots.
 - `lisp/my-prog.el`: tree-sitter, Eglot, Python, ESS, C/C++, shell, LaTeX.
 - `lisp/my-org.el`: Org, agenda, capture, LaTeX export.
 - `templates`: Tempel templates.
-- `elfeed.org`: RSS feeds; each `[[url][title]] :tags:` heading is one feed.
 
 ## Packages
 
 Third-party packages: meow, meow-tree-sitter, nano-theme, nano-modeline,
 vertico, orderless, marginalia, consult, corfu, tempel, avy, persp-mode, magit,
-ess, pdf-tools, gptel, codex-ide, ghostel and elfeed.
+ess, pdf-tools, gptel, codex-ide and ghostel.
 
 Everything else uses built-in Emacs features:
 
@@ -59,7 +58,6 @@ Everything else uses built-in Emacs features:
 | flymake-ruff                   | `python-flymake-command` running ruff            |
 | rust/go/yaml/web/lua modes     | tree-sitter modes (`treesit-enabled-modes`)      |
 | AUCTeX, cdlatex, xenops        | `latex-mode` with RefTeX                         |
-| elfeed-org                     | `my/elfeed-load-feeds`                           |
 | my-treesit.el                  | `treesit-enabled-modes`, `treesit-auto-install-grammar` |
 
 To add a package, declare it with `use-package` and `:ensure t` (or `:vc` for
