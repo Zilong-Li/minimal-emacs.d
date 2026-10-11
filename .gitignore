@@ -17,5 +17,8 @@
 !lisp/
 !lisp/my-treesit.el
 !lisp/TREE-SITTER.md
+!lisp/my-config-*.el
+!lisp/packages/
+!lisp/packages/my-config-*.el
 !tests/
 !tests/my-treesit-tests.el

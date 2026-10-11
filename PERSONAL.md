@@ -20,8 +20,13 @@ Edit the customization files directly:
 - `pre-early-init.el`: disables package.el initialization and sets frame choices.
 - `post-early-init.el`: disables automatic package.el installation by use-package.
 - `pre-init.el`: bootstraps Straight with built-in use-package.
-- `post-init.el`: installs and activates personal packages, configures the editor,
-  and enables personal modes.
+- `post-init.el`: loads personal modules in their dependency order.
+- `lisp/packages/my-config-PACKAGE.el`: each package's configuration, including
+  built-in packages. Deferred subpackage modules are required from their parent's
+  `:init` or `:config` block, preserving when they run.
+- `lisp/my-config-bootstrap.el`: Straight recipes and the package installation list.
+- Other `lisp/my-config-*.el` files: shared helpers, keybindings, platform settings,
+  and integrations across packages.
 - `templates`: Tempel templates.
 - `elfeed.org`: RSS feed list.
 
@@ -31,10 +36,18 @@ saved histories and custom.el are ignored.
 
 Package installation is declared centrally: add ordinary packages to
 `package-list` and custom repositories to `my/straight-custom-recipes` in
-`post-init.el`. Custom recipes are installed first and take precedence over the
+`lisp/my-config-bootstrap.el`. Custom recipes are installed first and take precedence over the
 general list. Straight installs and activates each package synchronously before
 the personal configuration runs. Existing deferred loading is preserved;
 automatic installation by use-package is disabled.
+
+To configure a package, edit its module under `lisp/packages/`. For a new package,
+declare its installation in the bootstrap module, create a module with lexical
+binding and `(provide 'my-config-PACKAGE)`, and add
+`(require 'my-config-PACKAGE "packages/my-config-PACKAGE")` to `post-init.el` after
+its dependencies. Modules are loaded once per session with `require`; restart
+Emacs to apply the complete configuration again. Keep the explicit loader order
+when moving integrations, especially Meow, completion, and Org setup.
 
 Use `M-x straight-pull-package` to update a package, or
 `M-x straight-freeze-versions` to record installed versions. See the
