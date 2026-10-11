@@ -5,7 +5,6 @@
 !.github/
 !.LICENSE
 !.gitignore
-!mini.org
 !elfeed.org
 !pre-early-init.el
 !post-early-init.el
@@ -13,12 +12,5 @@
 !post-init.el
 !templates
 !PERSONAL.md
-!tangle.el
 !lisp/
-!lisp/my-treesit.el
-!lisp/TREE-SITTER.md
-!lisp/my-config-*.el
-!lisp/packages/
-!lisp/packages/my-config-*.el
-!tests/
-!tests/my-treesit-tests.el
+!lisp/my-*.el

@@ -1,72 +1,70 @@
 # Personal configuration
 
-This directory combines the upstream minimal-emacs.d foundation with the
-personal configuration originally migrated from `../emacs.d/mini.org`.
-Personal customizations are now maintained directly in the `.el` files.
+This directory combines the upstream minimal-emacs.d foundation with a small
+personal layer. It prefers built-in Emacs features and keeps third-party
+packages to the key UI, editing and workflow tools.
 
-Requires Emacs 29 or newer and Git. Start this configuration with:
+Requires Emacs 31 or newer. Start it with:
 
 ```sh
 emacs --init-directory /Users/rlk420/Projects/minimal-emacs.d --debug-init
 ```
 
-The first start downloads Straight and installs the declared packages into
-`straight/`. Native packages such as Ghostel and PDF Tools still require their
-external build dependencies. Your font, Org, bibliography, mail and external-tool
-paths remain personal machine settings.
+The first start installs the packages with the built-in package.el (MELPA is
+preferred, then GNU and NonGNU ELPA). Ghostel offers to download its native
+module the first time it loads; PDF Tools builds `epdfinfo` the first time a
+PDF is opened. Tree-sitter grammars are installed on demand: Emacs asks once
+per language when a file first needs one.
 
-Edit the customization files directly:
-
-- `pre-early-init.el`: disables package.el initialization and sets frame choices.
-- `post-early-init.el`: disables automatic package.el installation by use-package.
-- `pre-init.el`: bootstraps Straight with built-in use-package.
-- `post-init.el`: loads personal modules in their dependency order.
-- `lisp/packages/my-config-PACKAGE.el`: each package's configuration, including
-  built-in packages. Deferred subpackage modules are required from their parent's
-  `:init` or `:config` block, preserving when they run.
-- `lisp/my-config-bootstrap.el`: Straight recipes and the package installation list.
-- Other `lisp/my-config-*.el` files: shared helpers, keybindings, platform settings,
-  and integrations across packages.
-- `templates`: Tempel templates.
-- `elfeed.org`: RSS feed list.
+## Files
 
 Keep the upstream `init.el`, `early-init.el` and README unchanged so upstream
-updates can be applied independently. Runtime caches, downloaded packages,
-saved histories and custom.el are ignored.
+updates can be applied independently.
 
-Package installation is declared centrally: add ordinary packages to
-`package-list` and custom repositories to `my/straight-custom-recipes` in
-`lisp/my-config-bootstrap.el`. Custom recipes are installed first and take precedence over the
-general list. Straight installs and activates each package synchronously before
-the personal configuration runs. Existing deferred loading is preserved;
-automatic installation by use-package is disabled.
+- `pre-early-init.el`: frame parameters and startup choices.
+- `post-early-init.el`: package archives and package.el policy.
+- `pre-init.el`: activates installed packages from the quickstart file.
+- `post-init.el`: loads the modules below in order.
+- `lisp/my-defaults.el`: built-in behaviour, files, history, platform, server.
+- `lisp/my-ui.el`: NANO theme and header line, fonts, windows, perspectives.
+- `lisp/my-keys.el`: Meow, structural editing, avy, global keys, `C-q` prefix.
+- `lisp/my-completion.el`: Vertico, Orderless, Marginalia, Consult, Corfu, Tempel.
+- `lisp/my-tools.el`: Dired, projects, TRAMP, Magit, shells, Ghostel, EWW,
+  PDF Tools, gptel, codex-ide, Elfeed, speech and screenshots.
+- `lisp/my-prog.el`: tree-sitter, Eglot, Python, ESS, C/C++, shell, LaTeX.
+- `lisp/my-org.el`: Org, agenda, capture, LaTeX export.
+- `templates`: Tempel templates.
+- `elfeed.org`: RSS feeds; each `[[url][title]] :tags:` heading is one feed.
 
-To configure a package, edit its module under `lisp/packages/`. For a new package,
-declare its installation in the bootstrap module, create a module with lexical
-binding and `(provide 'my-config-PACKAGE)`, and add
-`(require 'my-config-PACKAGE "packages/my-config-PACKAGE")` to `post-init.el` after
-its dependencies. Modules are loaded once per session with `require`; restart
-Emacs to apply the complete configuration again. Keep the explicit loader order
-when moving integrations, especially Meow, completion, and Org setup.
+## Packages
 
-Use `M-x straight-pull-package` to update a package, or
-`M-x straight-freeze-versions` to record installed versions. See the
-[Straight manual](https://github.com/radian-software/straight.el#user-manual)
-for package management and recipe syntax.
+Third-party packages: meow, meow-tree-sitter, nano-theme, nano-modeline,
+vertico, orderless, marginalia, consult, corfu, tempel, avy, persp-mode, magit,
+ess, pdf-tools, gptel, codex-ide, ghostel and elfeed.
 
-Startup garbage collection and native compilation paths are managed by
-minimal-emacs.d. Personal auto-save intervals and backup retention use the
-starter kit's centralized directories. Temporary startup mode-line hiding is
-disabled to let hide-mode-line/Nano own the final state. Frame dimensions are
-merged with the early transparency and blur settings.
-On macOS, early initialization also adds Homebrew GCC's `libemutls_w.a`
-directory to `LIBRARY_PATH` so native compilation can link primitive trampolines.
-The path is discovered through Homebrew's `opt/gcc` symlink after upgrades.
+Everything else uses built-in Emacs features:
 
-Org Agenda uses plain dates, ESS inspection uses a built-in help window, and
-JSON editing and spelling correction use built-in Emacs commands. The SVG,
-Nano Elfeed and ox-extra customizations were removed to avoid adding packages.
+| Instead of                     | Built-in                                         |
+|--------------------------------|--------------------------------------------------|
+| straight.el                    | package.el, `use-package :vc`, quickstart        |
+| smartparens                    | `electric-pair-local-mode`, sexp commands in `my-keys.el` |
+| ace-window, popper             | `other-window`, side windows (`` C-` ``, `C-c o o`) |
+| cape, capf-autosuggest         | `dabbrev-capf`, `ispell-completion-at-point`, a file capf |
+| embark                         | `which-key` (press `C-h` after a prefix)         |
+| hide-mode-line                 | `my/toggle-mode-line` (`C-c l s`)                |
+| kirigami, outline-indent       | Hideshow/Outline via `my/toggle-fold` (`F`)      |
+| hl-todo                        | font-lock keywords (`my/todo-keywords`)          |
+| vundo                          | `undo-redo` (`U`)                                |
+| ultra-scroll                   | `pixel-scroll-precision-mode`                    |
+| flymake-ruff                   | `python-flymake-command` running ruff            |
+| rust/go/yaml/web/lua modes     | tree-sitter modes (`treesit-enabled-modes`)      |
+| AUCTeX, cdlatex, xenops        | `latex-mode` with RefTeX                         |
+| elfeed-org                     | `my/elfeed-load-feeds`                           |
+| my-treesit.el                  | `treesit-enabled-modes`, `treesit-auto-install-grammar` |
 
-The old `elpaca/` cache is retained but is no longer initialized. Restart Emacs
-when switching package managers so only Straight's packages are activated.
-This change does not alter the default Emacs profile or ~/.emacs.d symlink.
+To add a package, declare it with `use-package` and `:ensure t` (or `:vc` for
+a Git repository) in the module where it belongs. Update packages with
+`M-x package-upgrade-all`; the quickstart file is refreshed automatically.
+
+codex-ide is installed but not activated at startup, because its autoloads
+would load Transient; it is loaded on the first `codex-ide-menu` (`C-q g c`).
