@@ -18,6 +18,10 @@ per language when a file first needs one.
 
 ## Files
 
+`config.org` is a literate version of every personal file below; tangle it
+(`C-c C-v t`, or `emacs --batch -l org config.org -f org-babel-tangle`) to
+regenerate them.
+
 Keep the upstream `init.el`, `early-init.el` and README unchanged so upstream
 updates can be applied independently.
 

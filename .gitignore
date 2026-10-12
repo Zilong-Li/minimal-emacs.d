@@ -11,5 +11,6 @@
 !post-init.el
 !templates
 !PERSONAL.md
+!config.org
 !lisp/
 !lisp/my-*.el
